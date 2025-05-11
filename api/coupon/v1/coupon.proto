@@ -4,14 +4,61 @@ package coupon.v1;
 
 option go_package = "github.com/dalcon10028/coxwave_backend_coding_test/gen/coupon/v1;couponv1";
 
-message HelloRequest {
-  string name = 1;
+import "google/protobuf/timestamp.proto";
+
+message Campaign {
+  int64 id = 1;
+  int64 total_coupons = 2;
+  int64 remaining_coupons = 3;
+  google.protobuf.Timestamp start_at = 4;
+  google.protobuf.Timestamp created_at = 5;
 }
 
-message HelloResponse {
-  string message = 1;
+message CreateCampaignRequest {
+  int64 total_coupons = 1;
+  int64 start_at = 2; // Unix timestamp
+}
+
+message CreateCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message GetCampaignRequest {
+  int64 id = 1;
+}
+
+message GetCampaignResponse {
+  Campaign campaign = 1;
+}
+
+message Coupon {
+  int64 id = 1;
+  int64 campaign_id = 2;
+  string code = 3;
+  google.protobuf.Timestamp created_at = 4;
+}
+
+message IssueCouponRequest {
+  int64 campaign_id = 1;
+  string code = 2;
+}
+
+message IssueCouponResponse {
+  Coupon coupon = 1;
+}
+
+message GetIssuedCouponsRequest {
+  int64 campaign_id = 1;
+}
+
+message GetIssuedCouponsResponse {
+  repeated string codes = 1;
 }
 
 service CouponService {
-  rpc Hello(HelloRequest) returns (HelloResponse) {}
+  rpc CreateCampaign(CreateCampaignRequest) returns (CreateCampaignResponse) {}
+  rpc GetCampaign(GetCampaignRequest) returns (GetCampaignResponse) {}
+  
+  rpc IssueCoupon(IssueCouponRequest) returns (IssueCouponResponse) {}
+  rpc GetIssuedCoupons(GetIssuedCouponsRequest) returns (GetIssuedCouponsResponse) {}
 } 

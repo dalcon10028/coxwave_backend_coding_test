@@ -3,6 +3,7 @@ package sqlite
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/dalcon10028/coxwave_backend_coding_test/internal/model"
@@ -71,21 +72,30 @@ func (r *CampaignRepository) IssueCoupon(ctx context.Context, campaignID int64, 
 	}
 	defer tx.Rollback()
 
+	// 남은 쿠폰 수 감소
+	result, err := tx.ExecContext(ctx, `
+		UPDATE campaign 
+		SET remaining_coupons = remaining_coupons - 1
+		WHERE id = ? AND remaining_coupons > 0
+	`, campaignID)
+	if err != nil {
+		return err
+	}
+
+	// 업데이트된 행이 있는지 확인
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return fmt.Errorf("failed to issue coupon, campaign id: %d", campaignID)
+	}
+
 	// 쿠폰 발급
 	_, err = tx.ExecContext(ctx, `
 		INSERT INTO coupon (campaign_id, code, created_at)
 		VALUES (?, ?, ?)
 	`, campaignID, code, time.Now())
-	if err != nil {
-		return err
-	}
-
-	// 남은 쿠폰 수 감소
-	_, err = tx.ExecContext(ctx, `
-		UPDATE campaign 
-		SET remaining_coupons = remaining_coupons - 1
-		WHERE id = ? AND remaining_coupons > 0
-	`, campaignID)
 	if err != nil {
 		return err
 	}
