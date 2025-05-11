@@ -1,0 +1,19 @@
+version: v2
+
+# 워크스페이스 내 모듈 정의
+modules:
+  - path: proto
+
+# 외부 의존성
+deps:
+  - buf.build/googleapis/googleapis:v1
+
+# 전역 lint 설정
+lint:
+  use:
+    - STANDARD
+
+# 전역 브레이킹 체인지 감지 설정
+breaking:
+  use:
+    - FILE
