@@ -5,9 +5,9 @@
 package couponv1connect
 
 import (
+	connect "connectrpc.com/connect"
 	context "context"
 	errors "errors"
-	connect_go "github.com/bufbuild/connect-go"
 	v1 "github.com/dalcon10028/coxwave_backend_coding_test/gen/coupon/v1"
 	http "net/http"
 	strings "strings"
@@ -18,7 +18,7 @@ import (
 // generated with a version of connect newer than the one compiled into your binary. You can fix the
 // problem by either regenerating this code with an older version of connect or updating the connect
 // version compiled into your binary.
-const _ = connect_go.IsAtLeastVersion0_1_0
+const _ = connect.IsAtLeastVersion1_13_0
 
 const (
 	// CouponServiceName is the fully-qualified name of the CouponService service.
@@ -33,22 +33,13 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
-	// CouponServiceCreateCampaignProcedure is the fully-qualified name of the CouponService's
-	// CreateCampaign RPC.
-	CouponServiceCreateCampaignProcedure = "/coupon.v1.CouponService/CreateCampaign"
-	// CouponServiceGetCampaignProcedure is the fully-qualified name of the CouponService's GetCampaign
-	// RPC.
-	CouponServiceGetCampaignProcedure = "/coupon.v1.CouponService/GetCampaign"
-	// CouponServiceIssueCouponProcedure is the fully-qualified name of the CouponService's IssueCoupon
-	// RPC.
-	CouponServiceIssueCouponProcedure = "/coupon.v1.CouponService/IssueCoupon"
+	// CouponServiceHelloProcedure is the fully-qualified name of the CouponService's Hello RPC.
+	CouponServiceHelloProcedure = "/coupon.v1.CouponService/Hello"
 )
 
 // CouponServiceClient is a client for the coupon.v1.CouponService service.
 type CouponServiceClient interface {
-	CreateCampaign(context.Context, *connect_go.Request[v1.CreateCampaignRequest]) (*connect_go.Response[v1.CreateCampaignResponse], error)
-	GetCampaign(context.Context, *connect_go.Request[v1.GetCampaignRequest]) (*connect_go.Response[v1.GetCampaignResponse], error)
-	IssueCoupon(context.Context, *connect_go.Request[v1.IssueCouponRequest]) (*connect_go.Response[v1.IssueCouponResponse], error)
+	Hello(context.Context, *connect.Request[v1.HelloRequest]) (*connect.Response[v1.HelloResponse], error)
 }
 
 // NewCouponServiceClient constructs a client for the coupon.v1.CouponService service. By default,
@@ -58,54 +49,32 @@ type CouponServiceClient interface {
 //
 // The URL supplied here should be the base URL for the Connect or gRPC server (for example,
 // http://api.acme.com or https://acme.com/grpc).
-func NewCouponServiceClient(httpClient connect_go.HTTPClient, baseURL string, opts ...connect_go.ClientOption) CouponServiceClient {
+func NewCouponServiceClient(httpClient connect.HTTPClient, baseURL string, opts ...connect.ClientOption) CouponServiceClient {
 	baseURL = strings.TrimRight(baseURL, "/")
+	couponServiceMethods := v1.File_coupon_v1_coupon_proto.Services().ByName("CouponService").Methods()
 	return &couponServiceClient{
-		createCampaign: connect_go.NewClient[v1.CreateCampaignRequest, v1.CreateCampaignResponse](
+		hello: connect.NewClient[v1.HelloRequest, v1.HelloResponse](
 			httpClient,
-			baseURL+CouponServiceCreateCampaignProcedure,
-			opts...,
-		),
-		getCampaign: connect_go.NewClient[v1.GetCampaignRequest, v1.GetCampaignResponse](
-			httpClient,
-			baseURL+CouponServiceGetCampaignProcedure,
-			opts...,
-		),
-		issueCoupon: connect_go.NewClient[v1.IssueCouponRequest, v1.IssueCouponResponse](
-			httpClient,
-			baseURL+CouponServiceIssueCouponProcedure,
-			opts...,
+			baseURL+CouponServiceHelloProcedure,
+			connect.WithSchema(couponServiceMethods.ByName("Hello")),
+			connect.WithClientOptions(opts...),
 		),
 	}
 }
 
 // couponServiceClient implements CouponServiceClient.
 type couponServiceClient struct {
-	createCampaign *connect_go.Client[v1.CreateCampaignRequest, v1.CreateCampaignResponse]
-	getCampaign    *connect_go.Client[v1.GetCampaignRequest, v1.GetCampaignResponse]
-	issueCoupon    *connect_go.Client[v1.IssueCouponRequest, v1.IssueCouponResponse]
+	hello *connect.Client[v1.HelloRequest, v1.HelloResponse]
 }
 
-// CreateCampaign calls coupon.v1.CouponService.CreateCampaign.
-func (c *couponServiceClient) CreateCampaign(ctx context.Context, req *connect_go.Request[v1.CreateCampaignRequest]) (*connect_go.Response[v1.CreateCampaignResponse], error) {
-	return c.createCampaign.CallUnary(ctx, req)
-}
-
-// GetCampaign calls coupon.v1.CouponService.GetCampaign.
-func (c *couponServiceClient) GetCampaign(ctx context.Context, req *connect_go.Request[v1.GetCampaignRequest]) (*connect_go.Response[v1.GetCampaignResponse], error) {
-	return c.getCampaign.CallUnary(ctx, req)
-}
-
-// IssueCoupon calls coupon.v1.CouponService.IssueCoupon.
-func (c *couponServiceClient) IssueCoupon(ctx context.Context, req *connect_go.Request[v1.IssueCouponRequest]) (*connect_go.Response[v1.IssueCouponResponse], error) {
-	return c.issueCoupon.CallUnary(ctx, req)
+// Hello calls coupon.v1.CouponService.Hello.
+func (c *couponServiceClient) Hello(ctx context.Context, req *connect.Request[v1.HelloRequest]) (*connect.Response[v1.HelloResponse], error) {
+	return c.hello.CallUnary(ctx, req)
 }
 
 // CouponServiceHandler is an implementation of the coupon.v1.CouponService service.
 type CouponServiceHandler interface {
-	CreateCampaign(context.Context, *connect_go.Request[v1.CreateCampaignRequest]) (*connect_go.Response[v1.CreateCampaignResponse], error)
-	GetCampaign(context.Context, *connect_go.Request[v1.GetCampaignRequest]) (*connect_go.Response[v1.GetCampaignResponse], error)
-	IssueCoupon(context.Context, *connect_go.Request[v1.IssueCouponRequest]) (*connect_go.Response[v1.IssueCouponResponse], error)
+	Hello(context.Context, *connect.Request[v1.HelloRequest]) (*connect.Response[v1.HelloResponse], error)
 }
 
 // NewCouponServiceHandler builds an HTTP handler from the service implementation. It returns the
@@ -113,30 +82,18 @@ type CouponServiceHandler interface {
 //
 // By default, handlers support the Connect, gRPC, and gRPC-Web protocols with the binary Protobuf
 // and JSON codecs. They also support gzip compression.
-func NewCouponServiceHandler(svc CouponServiceHandler, opts ...connect_go.HandlerOption) (string, http.Handler) {
-	couponServiceCreateCampaignHandler := connect_go.NewUnaryHandler(
-		CouponServiceCreateCampaignProcedure,
-		svc.CreateCampaign,
-		opts...,
-	)
-	couponServiceGetCampaignHandler := connect_go.NewUnaryHandler(
-		CouponServiceGetCampaignProcedure,
-		svc.GetCampaign,
-		opts...,
-	)
-	couponServiceIssueCouponHandler := connect_go.NewUnaryHandler(
-		CouponServiceIssueCouponProcedure,
-		svc.IssueCoupon,
-		opts...,
+func NewCouponServiceHandler(svc CouponServiceHandler, opts ...connect.HandlerOption) (string, http.Handler) {
+	couponServiceMethods := v1.File_coupon_v1_coupon_proto.Services().ByName("CouponService").Methods()
+	couponServiceHelloHandler := connect.NewUnaryHandler(
+		CouponServiceHelloProcedure,
+		svc.Hello,
+		connect.WithSchema(couponServiceMethods.ByName("Hello")),
+		connect.WithHandlerOptions(opts...),
 	)
 	return "/coupon.v1.CouponService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
-		case CouponServiceCreateCampaignProcedure:
-			couponServiceCreateCampaignHandler.ServeHTTP(w, r)
-		case CouponServiceGetCampaignProcedure:
-			couponServiceGetCampaignHandler.ServeHTTP(w, r)
-		case CouponServiceIssueCouponProcedure:
-			couponServiceIssueCouponHandler.ServeHTTP(w, r)
+		case CouponServiceHelloProcedure:
+			couponServiceHelloHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -146,14 +103,6 @@ func NewCouponServiceHandler(svc CouponServiceHandler, opts ...connect_go.Handle
 // UnimplementedCouponServiceHandler returns CodeUnimplemented from all methods.
 type UnimplementedCouponServiceHandler struct{}
 
-func (UnimplementedCouponServiceHandler) CreateCampaign(context.Context, *connect_go.Request[v1.CreateCampaignRequest]) (*connect_go.Response[v1.CreateCampaignResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("coupon.v1.CouponService.CreateCampaign is not implemented"))
-}
-
-func (UnimplementedCouponServiceHandler) GetCampaign(context.Context, *connect_go.Request[v1.GetCampaignRequest]) (*connect_go.Response[v1.GetCampaignResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("coupon.v1.CouponService.GetCampaign is not implemented"))
-}
-
-func (UnimplementedCouponServiceHandler) IssueCoupon(context.Context, *connect_go.Request[v1.IssueCouponRequest]) (*connect_go.Response[v1.IssueCouponResponse], error) {
-	return nil, connect_go.NewError(connect_go.CodeUnimplemented, errors.New("coupon.v1.CouponService.IssueCoupon is not implemented"))
+func (UnimplementedCouponServiceHandler) Hello(context.Context, *connect.Request[v1.HelloRequest]) (*connect.Response[v1.HelloResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("coupon.v1.CouponService.Hello is not implemented"))
 }

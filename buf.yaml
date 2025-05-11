@@ -2,7 +2,7 @@ version: v2
 
 # 워크스페이스 내 모듈 정의
 modules:
-  - path: proto
+  - path: api
 
 # 외부 의존성
 deps:

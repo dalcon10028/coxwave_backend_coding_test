@@ -1,21 +1,42 @@
 package main
 
 import (
-  "fmt"
+	"context"
+	"fmt"
+	"log"
+	"net/http"
+
+	"connectrpc.com/connect"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
+
+	couponv1 "github.com/dalcon10028/coxwave_backend_coding_test/gen/coupon/v1"
+	"github.com/dalcon10028/coxwave_backend_coding_test/gen/coupon/v1/couponv1connect"
 )
 
-//TIP <p>To run your code, right-click the code and select <b>Run</b>.</p> <p>Alternatively, click
-// the <icon src="AllIcons.Actions.Execute"/> icon in the gutter and select the <b>Run</b> menu item from here.</p>
+type CouponServer struct{}
+
+func (s *CouponServer) Hello(
+	ctx context.Context,
+	req *connect.Request[couponv1.HelloRequest],
+) (*connect.Response[couponv1.HelloResponse], error) {
+	res := connect.NewResponse(&couponv1.HelloResponse{
+		Message: fmt.Sprintf("안녕하세요, %s님!", req.Msg.Name),
+	})
+	return res, nil
+}
 
 func main() {
-  //TIP <p>Press <shortcut actionId="ShowIntentionActions"/> when your caret is at the underlined text
-  // to see how GoLand suggests fixing the warning.</p><p>Alternatively, if available, click the lightbulb to view possible fixes.</p>
-  s := "gopher"
-  fmt.Printf("Hello and welcome, %s!\n", s)
+	couponServer := &CouponServer{}
+	mux := http.NewServeMux()
+	path, handler := couponv1connect.NewCouponServiceHandler(couponServer)
+	mux.Handle(path, handler)
 
-  for i := 1; i <= 5; i++ {
-	//TIP <p>To start your debugging session, right-click your code in the editor and select the Debug option.</p> <p>We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-	// for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.</p>
-	fmt.Println("i =", 100/i)
-  }
+	var url string = "localhost:8080"
+
+	log.Println("Server is running on ", url)
+	http.ListenAndServe(
+		url,
+		h2c.NewHandler(mux, &http2.Server{}),
+	)
 }
