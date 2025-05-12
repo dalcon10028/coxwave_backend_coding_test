@@ -77,7 +77,7 @@ func (s *CouponServer) IssueCoupon(
 	ctx context.Context,
 	req *connect.Request[couponv1.IssueCouponRequest],
 ) (*connect.Response[couponv1.IssueCouponResponse], error) {
-	err := s.campaignRepo.IssueCoupon(ctx, req.Msg.CampaignId, req.Msg.Code)
+	code, err := s.campaignRepo.IssueCoupon(ctx, req.Msg.CampaignId)
 	if err != nil {
 		return nil, connect.NewError(connect.CodeInternal, err)
 	}
@@ -85,7 +85,7 @@ func (s *CouponServer) IssueCoupon(
 	res := connect.NewResponse(&couponv1.IssueCouponResponse{
 		Coupon: &couponv1.Coupon{
 			CampaignId: req.Msg.CampaignId,
-			Code:       req.Msg.Code,
+			Code:       code,
 			CreatedAt:  timestamppb.New(time.Now()),
 		},
 	})

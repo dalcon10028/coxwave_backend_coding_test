@@ -353,7 +353,6 @@ func (x *Coupon) GetCreatedAt() *timestamppb.Timestamp {
 type IssueCouponRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	CampaignId    int64                  `protobuf:"varint,1,opt,name=campaign_id,json=campaignId,proto3" json:"campaign_id,omitempty"`
-	Code          string                 `protobuf:"bytes,2,opt,name=code,proto3" json:"code,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -393,13 +392,6 @@ func (x *IssueCouponRequest) GetCampaignId() int64 {
 		return x.CampaignId
 	}
 	return 0
-}
-
-func (x *IssueCouponRequest) GetCode() string {
-	if x != nil {
-		return x.Code
-	}
-	return ""
 }
 
 type IssueCouponResponse struct {
@@ -561,11 +553,10 @@ const file_coupon_v1_coupon_proto_rawDesc = "" +
 	"campaignId\x12\x12\n" +
 	"\x04code\x18\x03 \x01(\tR\x04code\x129\n" +
 	"\n" +
-	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"I\n" +
+	"created_at\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"5\n" +
 	"\x12IssueCouponRequest\x12\x1f\n" +
 	"\vcampaign_id\x18\x01 \x01(\x03R\n" +
-	"campaignId\x12\x12\n" +
-	"\x04code\x18\x02 \x01(\tR\x04code\"@\n" +
+	"campaignId\"@\n" +
 	"\x13IssueCouponResponse\x12)\n" +
 	"\x06coupon\x18\x01 \x01(\v2\x11.coupon.v1.CouponR\x06coupon\":\n" +
 	"\x17GetIssuedCouponsRequest\x12\x1f\n" +

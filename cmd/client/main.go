@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -54,7 +53,6 @@ func main() {
 			ctx,
 			connect.NewRequest(&couponv1.IssueCouponRequest{
 				CampaignId: campaign.Id,
-				Code:       fmt.Sprintf("TEST%d", i),
 			}),
 		)
 		if err != nil {

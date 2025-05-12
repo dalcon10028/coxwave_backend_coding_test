@@ -40,7 +40,6 @@ message Coupon {
 
 message IssueCouponRequest {
   int64 campaign_id = 1;
-  string code = 2;
 }
 
 message IssueCouponResponse {

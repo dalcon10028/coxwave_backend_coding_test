@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/dalcon10028/coxwave_backend_coding_test/internal/model"
@@ -65,10 +66,33 @@ func (r *CampaignRepository) Get(ctx context.Context, id int64) (*model.Campaign
 	return &campaign, nil
 }
 
-func (r *CampaignRepository) IssueCoupon(ctx context.Context, campaignID int64, code string) error {
+const (
+	// 한글 유니코드 범위: 가(0xAC00) ~ 힣(0xD7A3)
+	hangulStart = 0xAC00
+	hangulEnd   = 0xD7A3
+	numbers     = "0123456789"
+)
+
+func generateCouponCode(campaignID int64) string {
+	rand.Seed(time.Now().UnixNano())
+
+	hangulPart := make([]rune, 2)
+	for i := range hangulPart {
+		hangulPart[i] = rune(hangulStart + rand.Intn(hangulEnd-hangulStart+1))
+	}
+
+	numPart := make([]byte, 4)
+	for i := range numPart {
+		numPart[i] = numbers[rand.Intn(len(numbers))]
+	}
+
+	return fmt.Sprintf("%d%s%s", campaignID, string(hangulPart), string(numPart))
+}
+
+func (r *CampaignRepository) IssueCoupon(ctx context.Context, campaignID int64) (string, error) {
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer tx.Rollback()
 
@@ -76,20 +100,23 @@ func (r *CampaignRepository) IssueCoupon(ctx context.Context, campaignID int64, 
 	result, err := tx.ExecContext(ctx, `
 		UPDATE campaign 
 		SET remaining_coupons = remaining_coupons - 1
-		WHERE id = ? AND remaining_coupons > 0
-	`, campaignID)
+		WHERE id = ? AND remaining_coupons > 0 AND start_at <= ?
+	`, campaignID, time.Now())
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// 업데이트된 행이 있는지 확인
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if rowsAffected == 0 {
-		return fmt.Errorf("failed to issue coupon, campaign id: %d", campaignID)
+		return "", fmt.Errorf("failed to issue coupon, campaign id: %d", campaignID)
 	}
+
+	// 쿠폰 코드 생성
+	code := generateCouponCode(campaignID)
 
 	// 쿠폰 발급
 	_, err = tx.ExecContext(ctx, `
@@ -97,10 +124,14 @@ func (r *CampaignRepository) IssueCoupon(ctx context.Context, campaignID int64, 
 		VALUES (?, ?, ?)
 	`, campaignID, code, time.Now())
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return tx.Commit()
+	if err := tx.Commit(); err != nil {
+		return "", err
+	}
+
+	return code, nil
 }
 
 func (r *CampaignRepository) GetIssuedCodes(ctx context.Context, campaignID int64) ([]string, error) {

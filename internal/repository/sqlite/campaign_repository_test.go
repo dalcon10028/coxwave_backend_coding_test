@@ -3,7 +3,6 @@ package sqlite
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"testing"
 	"time"
 
@@ -82,12 +81,12 @@ func TestCampaignRepository_IssueCoupon(t *testing.T) {
 	}
 
 	// when
-	err = repo.IssueCoupon(ctx, campaign.ID, "CODE1")
+	code1, err := repo.IssueCoupon(ctx, campaign.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = repo.IssueCoupon(ctx, campaign.ID, "CODE2")
+	code2, err := repo.IssueCoupon(ctx, campaign.ID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -107,7 +106,9 @@ func TestCampaignRepository_IssueCoupon(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(codes) != 2 {
-		fmt.Println(codes)
 		t.Error("Expected 2 issued codes, but got", len(codes))
+	}
+	if codes[0] != code1 || codes[1] != code2 {
+		t.Error("Issued codes do not match")
 	}
 }
